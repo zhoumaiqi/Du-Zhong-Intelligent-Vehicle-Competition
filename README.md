@@ -195,54 +195,83 @@ source devel/setup.bash
 ## 9️⃣ License
 私有声明，未经授权，不得复制、传播以用于商业目的。
 
-## 📍实机通信配置
+# 🤖 Simulation-First Development
 
-### ⚙️ 路由器配置
+> This module focuses on **developing in simulation while reusing as much real robot code as possible**.  
+> The goal is to **test algorithms without relying on the physical robot**, preparing for future deployment on the real platform.
 
-上个赛事中用校园网不太稳定，改用路由器，来为虚拟机和小车手动分配ip
+**Environment**
 
-#### 1.上网设置
+- VM Image: **BJDZ_Namcha**
+- OS: Ubuntu
+- ROS: **ROS1 Noetic**
+- Simulator: **Gazebo (TurtleBot3)**
 
-WAN口连接类型保持默认的自动获得IP地址即可
+---
 
-#### 2.LAN口设置
+# 🚀 Startup Procedure
 
-选择手动设置，分配好ip，子网掩码默认为255.255.255.0
+Follow the steps below to start the simulation SLAM workflow.
 
-#### 3.DHCP服务器
+---
 
-设置地址池开始地址和结束地址
+## 1️⃣ Start ROS Master
 
-在同一网段下，开始地址和结束地址默认设置为100和199，其他不用动
+```bash
+roscore
+```
 
-电脑连接网络后，检查一下是否可以正常上网。在设备管理界面也可以查看此时连接的设备
+## 2️⃣ Launch the Gazebo Simulation
 
-### ⚙️ 虚拟机网络配置
-目的是将虚拟机分配到路由器LAN口的网段内，使得可以与小车进行ssh连接
+```bash
+roslaunch turtlebot3_gazebo turtlebot3_world.launch
+```
 
-打开VMware，在上方栏打开“编辑”，选择虚拟网络编辑器
+## 3️⃣ Enable Simulation Time
 
-选择桥接到：Intel(R) Wi-Fi 6 AX201 160MHz，防止桥接到虚拟网络中，导致ip分配到其他网段
+```bash
+rosparam set use_sim_time true
+```
 
-测试：打开虚拟机终端，输入`hostname -I`查看ip
+## 4️⃣ Compile the dzactuator Package
 
-### ⚙️ 主从机配置
+```bash
+cd Du-Zhong-Intelligent-Vehicle-Competition/
+catkin_make --pkg dzactuator
+```
 
-#### 配置主机
+## 4️⃣ Compile the dzactuator Package
 
-`sudo nano /etc/hosts` 添上主从机的用户名及对应的IP
+```bash
+cd Du-Zhong-Intelligent-Vehicle-Competition/
+catkin_make --pkg dzactuator
+source devel/setup.bash
+```
 
-#### 配置从机
+## 5️⃣ Start SLAM (Gmapping)
 
-`sudo nano /etc/hosts` 添上主从机的用户名及对应的IP（同上）
+```bash
+roslaunch dzactuator gmapping.launch
+```
+This launches the Gmapping SLAM node to build a map using LiDAR data.
 
-`sudo nano ~/.bashrc`
-在最后一行添上对应的主机
+## 6️⃣ Launch RViz Visualization
 
-`export ROS_MASTER_URI=http://192.168.12.102:11311/`
-（IP为主机IP）
+```bash
+rviz -d rviz.rviz
+```
 
+## 7️⃣ Control the Robot to Build the Map
 
+```bash
+rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+```
+Use the keyboard to move the robot and explore the environment to generate a complete map.
 
+![示例图片](src/参考图/gmapping_demo.png)
 
+## 8️⃣ Save the Generated Map
 
+```bash
+roslaunch dzactuator map_saver.launch
+```
