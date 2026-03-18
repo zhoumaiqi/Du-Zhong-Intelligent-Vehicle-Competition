@@ -238,13 +238,6 @@ rosparam set use_sim_time true
 ```bash
 cd Du-Zhong-Intelligent-Vehicle-Competition/
 catkin_make --pkg dzactuator
-```
-
-## 4️⃣ Compile the dzactuator Package
-
-```bash
-cd Du-Zhong-Intelligent-Vehicle-Competition/
-catkin_make --pkg dzactuator
 source devel/setup.bash
 ```
 
